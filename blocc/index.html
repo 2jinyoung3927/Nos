@@ -1118,9 +1118,16 @@
             $('login-id').addEventListener('input', () => setAlert('login', ''));
         });
 
-        // 모달 바깥 클릭 시 닫기 (입력 중 실수로 닫히지 않도록 내부 클릭은 무시)
+        // 모달 바깥 클릭 시 닫기.
+        // 입력창에서 드래그하다 바깥에서 마우스를 놓으면 click의 target이 모달 배경이 되어
+        // 실수로 닫히므로, mousedown과 click이 모두 배경에서 일어난 경우에만 닫는다.
+        let backdropPressed = false;
+        window.addEventListener('mousedown', event => {
+            backdropPressed = event.target === $('authModal');
+        });
         window.addEventListener('click', event => {
-            if (event.target === $('authModal')) closeAuthModal();
+            if (backdropPressed && event.target === $('authModal')) closeAuthModal();
+            backdropPressed = false;
         });
     </script>
 </head>
