@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>blocc - 일과 이동을 편리하게</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 도로명주소 검색 (카카오 우편번호 서비스) -->
+    <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --color-white: #ffffff;
+            --color-black: #000000;
+            --color-gray-light: #f5f5f5;
+            --color-gray-medium: #888888;
+            --color-gray-dark: #333333;
+            --color-accent: #FF7100;
+            --color-accent-hover: #e56800;
+            --color-ivory: #f5f1eb;
+            --color-error: #e74c3c;
+            --color-ok: #27ae60;
+            --font-family: 'Pretendard', sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--color-black);
+            line-height: 1.6;
+            letter-spacing: -0.3px;
+            background: var(--color-white);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .brand-logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF7100, #FFB366);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 113, 0, 0.3);
+        }
+
+        /* ===== SHARED ===== */
+        section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 80px;
+            text-align: center;
+        }
+
+        .placeholder {
+            color: var(--color-gray-medium);
+            font-size: 14px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .placeholder span { color: red; }
+
+        .mono-icon { display: inline-block; font-size: 48px; margin-bottom: 20px; }
+
+        /* ===== HERO ===== */
+        .hero {
+            width: 100%;
+            height: 100vh;
+            min-height: 560px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: #2b2b2b;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+            z-index: 1;
+        }
+
+        .hero-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            color: var(--color-white);
+        }
+
+        .hero h1 { font-size: 56px; font-weight: 700; margin-bottom: 24px; line-height: 1.2; }
+
+        .hero p { font-size: 20px; font-weight: 300; margin-bottom: 48px; }
+
+        .scroll-indicator {
+            display: inline-block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(12px); }
+        }
+
+        /* ===== PROBLEM / BEFORE ===== */
+        .problem {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            padding: 100px 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .problem-image {
+            width: 100%;
+            height: 600px;
+            background-color: var(--color-gray-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .problem-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .problem-content h2 {
+            font-size: 32px;
+            text-align: left;
+            margin-bottom: 40px;
+            line-height: 1.3;
+        }
+
+        .problem-content .lead {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--color-gray-dark);
+            margin-bottom: 40px;
+        }
+
+        .problem-list { list-style: none; margin-bottom: 40px; }
+
+        .problem-list li {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .problem-list li::before {
+            content: '✕';
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .problem-conclusion { font-size: 22px; font-weight: 600; line-height: 1.5; }
+
+        /* ===== CORE SENTENCE + BEFORE/AFTER ===== */
+        .core {
+            padding: 100px 60px;
+            background-color: var(--color-black);
+            color: var(--color-white);
+            text-align: center;
+        }
+
+        .core-sentence {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 80px;
+        }
+
+        .core-sentence em { font-style: normal; color: var(--color-accent); }
+
+        .before-after {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 60px 1fr;
+            align-items: stretch;
+            gap: 0;
+        }
+
+        .ba-card { padding: 40px; border-radius: 8px; text-align: left; }
+
+        .ba-before { background: #1c1c1c; color: #bdbdbd; }
+
+        .ba-after { background: var(--color-white); color: var(--color-black); }
+
+        .ba-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .ba-card h3 { font-size: 22px; margin-bottom: 16px; line-height: 1.4; }
+
+        .ba-card p { font-size: 15px; line-height: 1.7; }
+
+        .ba-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--color-accent);
+        }
+
+        /* ===== VALUES ===== */
+        .values { padding: 100px 60px; background-color: var(--color-ivory); }
+
+        .values-container { max-width: 1400px; margin: 0 auto; }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .value-card {
+            background: var(--color-white);
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .value-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+
+        .value-card .subtitle {
+            font-size: 14px;
+            color: var(--color-gray-medium);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .value-card p { font-size: 16px; line-height: 1.6; color: var(--color-gray-dark); }
+
+        /* ===== FEATURES ===== */
+        .features { padding: 100px 60px; background-color: var(--color-white); }
+
+        .features-container { max-width: 1400px; margin: 0 auto; }
+
+        .features-intro { text-align: center; margin-bottom: 80px; }
+
+        .features-intro h2 { margin-bottom: 20px; }
+
+        .features-intro .tagline {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-accent);
+            margin-bottom: 30px;
+        }
+
+        .features-intro p.body {
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--color-gray-dark);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .feature-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 80px;
+        }
+
+        .feature-item { display: flex; flex-direction: column; gap: 30px; }
+
+        .feature-item-image {
+            width: 100%;
+            height: 400px;
+            background-color: var(--color-gray-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .feature-item-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .feature-item h3 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+
+        .feature-item p { font-size: 16px; line-height: 1.6; color: var(--color-gray-dark); }
+
+        .spec-box {
+            background-color: var(--color-ivory);
+            padding: 40px;
+            border-radius: 8px;
+        }
+
+        .spec-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-gray-medium);
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .spec-item { border-right: 1px solid var(--color-gray-medium); padding-right: 20px; }
+
+        .spec-item:last-child { border-right: none; }
+
+        .spec-item .spec-category { font-weight: 600; margin-bottom: 12px; }
+
+        .spec-item p { font-size: 16px; line-height: 1.6; }
+
+        /* ===== DEEP DIVE ===== */
+        .deepdive {
+            position: relative;
+            height: 700px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #2b2b2b;
+        }
+
+        .deepdive::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
+            z-index: 1;
+        }
+
+        .deepdive-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .deepdive-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 700px;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            margin: 0 20px;
+        }
+
+        .deepdive-content p { font-size: 18px; line-height: 1.8; white-space: pre-line; }
+
+        /* ===== PROCESS ===== */
+        .process { padding: 100px 60px; background-color: var(--color-ivory); }
+
+        .process-container { max-width: 1400px; margin: 0 auto; }
+
+        .process-step {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            padding: 60px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .process-step:last-child { border-bottom: none; }
+
+        .process-step:nth-child(even) .process-text { order: 2; }
+
+        .process-image {
+            width: 100%;
+            height: 400px;
+            background-color: var(--color-white);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .process-text h3 { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+
+        .process-text p { font-size: 16px; line-height: 1.6; color: var(--color-gray-dark); }
+
+        /* ===== VALUE MESSAGE ===== */
+        .value-message { padding: 100px 60px; background-color: var(--color-white); }
+
+        .value-message-container { max-width: 900px; margin: 0 auto; text-align: center; }
+
+        .value-message h2 { margin-bottom: 60px; }
+
+        .value-message p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--color-gray-dark);
+            white-space: pre-line;
+        }
+
+        /* ===== CTA ===== */
+        .cta { padding: 100px 60px; background-color: var(--color-ivory); }
+
+        .cta-container { max-width: 1400px; margin: 0 auto; }
+
+        .cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+
+        .cta-card {
+            background: var(--color-white);
+            padding: 60px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .cta-card h3 { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
+
+        .cta-card .subtext {
+            font-size: 14px;
+            color: var(--color-gray-medium);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-list { list-style: none; margin-bottom: 40px; text-align: left; }
+
+        .cta-list li { font-size: 16px; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--color-accent);
+            color: var(--color-white);
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .cta-button:hover { background-color: var(--color-accent-hover); }
+
+        /* ===== MAKER ===== */
+        .maker { padding: 100px 60px; background-color: var(--color-white); }
+
+        .maker-container { max-width: 800px; margin: 0 auto; text-align: center; }
+
+        .maker h2 { margin-bottom: 60px; }
+
+        .maker-image {
+            width: 200px;
+            height: 200px;
+            background-color: var(--color-gray-light);
+            border-radius: 8px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .maker h3 { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
+
+        .maker-bio {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--color-gray-dark);
+            margin-bottom: 30px;
+            min-height: 80px;
+        }
+
+        .maker-sns {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .maker-sns a, .footer-block a {
+            display: inline-block;
+            margin: 0 15px;
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .maker-sns a:hover, .footer-block a:hover { text-decoration: underline; }
+
+        /* ===== FOOTER ===== */
+        .footer { padding: 80px 60px; background-color: var(--color-gray-light); }
+
+        .footer-container { max-width: 1400px; margin: 0 auto; }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-block { text-align: center; }
+
+        .footer-block h4 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+        .footer-block p { font-size: 14px; line-height: 1.6; color: var(--color-gray-dark); margin-bottom: 12px; }
+
+        .footer-block a { margin: 12px 8px 0; font-size: 14px; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-size: 12px;
+            color: var(--color-gray-medium);
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background-color: var(--color-white);
+            padding: 48px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 520px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 { font-size: 28px; font-weight: 700; text-align: left; margin: 0; }
+
+        .close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--color-gray-medium);
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+
+        .close-btn:hover { color: var(--color-black); }
+
+        .form-section, .signup-step { display: none; }
+
+        .form-section.active, .signup-step.active { display: block; }
+
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: var(--color-gray-medium);
+        }
+
+        .step-indicator span { flex: 1; text-align: center; padding-bottom: 8px; border-bottom: 3px solid #e5e5e5; }
+
+        .step-indicator span.current { color: var(--color-black); font-weight: 600; border-bottom-color: var(--color-accent); }
+
+        .step-indicator span.done { border-bottom-color: #bbb; }
+
+        .form-alert {
+            display: none;
+            background: #fdecea;
+            color: var(--color-error);
+            font-size: 14px;
+            padding: 12px 14px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .form-alert.show { display: block; }
+
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 6px;
+            color: var(--color-accent);
+        }
+
+        .tag.optional { color: var(--color-gray-medium); }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: var(--font-family);
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background: var(--color-white);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(255, 113, 0, 0.1);
+        }
+
+        .form-group input[readonly] { background: var(--color-gray-light); color: var(--color-gray-dark); }
+
+        .input-invalid { border-color: var(--color-error) !important; }
+
+        .field-msg { font-size: 12px; margin-top: 6px; min-height: 16px; }
+
+        .field-msg.error { color: var(--color-error); }
+
+        .field-msg.ok { color: var(--color-ok); }
+
+        .input-row { display: flex; gap: 8px; }
+
+        .input-row input { flex: 1; }
+
+        .btn-inline {
+            padding: 0 16px;
+            border: 1px solid var(--color-black);
+            background: var(--color-white);
+            border-radius: 4px;
+            font-family: var(--font-family);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-inline:hover { background: var(--color-gray-light); }
+
+        .birth-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 8px; align-items: center; }
+
+        .birth-row .unit { font-size: 14px; margin-left: 4px; color: var(--color-gray-dark); }
+
+        .birth-field { display: flex; align-items: center; }
+
+        .birth-field input { text-align: right; }
+
+        .checkbox-group { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+
+        .checkbox-item { display: flex; align-items: center; }
+
+        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 10px; cursor: pointer; }
+
+        .checkbox-item label { margin: 0; font-weight: 400; cursor: pointer; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 28px; }
+
+        .form-actions button {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-family: var(--font-family);
+        }
+
+        .btn-primary { background-color: var(--color-accent); color: var(--color-white); }
+
+        .btn-primary:hover { background-color: var(--color-accent-hover); }
+
+        .btn-secondary { background-color: var(--color-gray-light); color: var(--color-black); border: 1px solid #ddd; }
+
+        .btn-secondary:hover { background-color: #eee; }
+
+        .toggle-form { text-align: center; margin-top: 20px; font-size: 14px; color: var(--color-gray-medium); }
+
+        .toggle-form a { color: var(--color-accent); cursor: pointer; font-weight: 600; }
+
+        .toggle-form a:hover { text-decoration: underline; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .problem, .cta-grid, .footer-grid, .feature-items, .values-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 40px; }
+            .process-step { grid-template-columns: 1fr; }
+            .process-step:nth-child(even) .process-text { order: 0; }
+            .before-after { grid-template-columns: 1fr; }
+            .ba-arrow { transform: rotate(90deg); height: 60px; }
+        }
+
+        @media (max-width: 768px) {
+            section h2 { font-size: 28px; margin-bottom: 48px; }
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .problem, .core, .values, .features, .process, .value-message, .cta, .maker, .footer { padding-left: 16px; padding-right: 16px; }
+            .modal-content { padding: 32px 20px; width: 92%; }
+            .header { padding: 15px 16px; }
+            .profile-icon { width: 45px; height: 45px; font-size: 20px; }
+            .spec-grid { grid-template-columns: 1fr; }
+            .spec-item { border-right: none; border-bottom: 1px solid #ddd; padding: 0 0 16px; }
+            .core-sentence { font-size: 26px; }
+            .cta-card { padding: 40px 24px; }
+            .birth-row { grid-template-columns: 1.6fr 1fr 1fr; }
+        }
+    </style>
+    <script>
+        /* =========================================================
+           AUTH MODAL
+           - 로그인: 아이디 + 비밀번호
+           - 회원가입: 3단계(계정 → 개인정보 → 배송·동의)
+           - 다음 단계로 넘어갈 때 현재 단계의 필수 항목을 검증
+           - 실패해도 입력값은 유지됨 (단계 전환은 DOM을 숨길 뿐 지우지 않음)
+           ========================================================= */
+
+        const SIGNUP_STEPS = 3;
+        let currentStep = 1;
+
+        const RULES = {
+            id: {
+                test: v => /^[a-z][a-z0-9]{3,19}$/.test(v),
+                msg: '아이디는 영문 소문자로 시작하는 4~20자 (영문 소문자·숫자)로 입력해주세요.'
+            },
+            password: {
+                test: v => v.length >= 8 && v.length <= 20 && /[A-Za-z]/.test(v) && /\d/.test(v) && /[^A-Za-z0-9]/.test(v),
+                msg: '8~20자, 영문·숫자·특수문자를 모두 포함해주세요.'
+            },
+            email: {
+                test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+                msg: '이메일 형식이 올바르지 않습니다. (예: example@email.com)'
+            },
+            name: {
+                test: v => /^[가-힣a-zA-Z ]{2,20}$/.test(v.trim()),
+                msg: '실명을 2~20자로 입력해주세요. (한글 또는 영문)'
+            },
+            phone: {
+                test: v => /^010-\d{4}-\d{4}$/.test(v),
+                msg: '휴대폰 번호는 010-0000-0000 형식으로 입력해주세요.'
+            }
+        };
+
+        const $ = id => document.getElementById(id);
+
+        function openAuthModal() {
+            // 항상 로그인 화면으로 연다. 회원가입 중이던 입력값은 DOM에 남아 있어 '회원가입' 링크로 돌아가면 그대로 보인다.
+            $('loginForm').classList.add('active');
+            $('signupForm').classList.remove('active');
+            $('modalTitle').textContent = '로그인';
+            $('authModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAuthModal() {
+            $('authModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleForm() {
+            const showingSignup = $('signupForm').classList.contains('active');
+            $('loginForm').classList.toggle('active', showingSignup);
+            $('signupForm').classList.toggle('active', !showingSignup);
+            $('modalTitle').textContent = showingSignup ? '로그인' : '회원가입';
+            if (!showingSignup) goToStep(1);
+        }
+
+        /* ---------- 공통: 필드 메시지 ---------- */
+        function setMsg(fieldId, msg, type = 'error') {
+            const el = $('msg-' + fieldId);
+            if (!el) return;
+            el.textContent = msg || '';
+            el.className = 'field-msg' + (msg ? ' ' + type : '');
+            const input = $(fieldId);
+            if (input && type === 'error') input.classList.toggle('input-invalid', !!msg);
+            if (input && type === 'ok') input.classList.remove('input-invalid');
+        }
+
+        function setAlert(stepNo, msg) {
+            const box = $(typeof stepNo === 'number' ? 'alert-step' + stepNo : 'alert-' + stepNo);
+            box.textContent = msg || '';
+            box.classList.toggle('show', !!msg);
+        }
+
+        /* ---------- 필드별 검증 (빈 값은 제출 시점에 검사) ---------- */
+        function checkId() {
+            const v = $('signup-id').value.trim();
+            if (!v) { setMsg('signup-id', ''); return '입력 필요'; }
+            const bad = !RULES.id.test(v);
+            setMsg('signup-id', bad ? RULES.id.msg : '사용 가능한 형식입니다.', bad ? 'error' : 'ok');
+            return bad ? '형식 오류' : '';
+        }
+
+        function checkPassword() {
+            const v = $('signup-password').value;
+            if (!v) { setMsg('signup-password', ''); return checkConfirm(); }
+            const bad = !RULES.password.test(v);
+            setMsg('signup-password', bad ? RULES.password.msg : '', 'error');
+            checkConfirm();
+            return bad ? '형식 오류' : '';
+        }
+
+        function checkConfirm() {
+            const pw = $('signup-password').value;
+            const cf = $('signup-confirm-password').value;
+            if (!cf) { setMsg('signup-confirm-password', ''); return '입력 필요'; }
+            if (pw !== cf) {
+                setMsg('signup-confirm-password', '비밀번호가 일치하지 않습니다.', 'error');
+                return '불일치';
+            }
+            setMsg('signup-confirm-password', '비밀번호가 일치합니다.', 'ok');
+            return '';
+        }
+
+        function checkEmail() {
+            const v = $('signup-email').value.trim();
+            if (!v) { setMsg('signup-email', ''); return ''; } // 선택 항목
+            const bad = !RULES.email.test(v);
+            setMsg('signup-email', bad ? RULES.email.msg : '', 'error');
+            return bad ? '형식 오류' : '';
+        }
+
+        function checkName() {
+            const v = $('signup-name').value;
+            if (!v.trim()) { setMsg('signup-name', ''); return '입력 필요'; }
+            const bad = !RULES.name.test(v);
+            setMsg('signup-name', bad ? RULES.name.msg : '', 'error');
+            return bad ? '형식 오류' : '';
+        }
+
+        function formatPhone(el) {
+            const d = el.value.replace(/\D/g, '').slice(0, 11);
+            if (d.length < 4) el.value = d;
+            else if (d.length < 8) el.value = d.slice(0, 3) + '-' + d.slice(3);
+            else el.value = d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+        }
+
+        function checkPhone() {
+            const v = $('signup-phone').value;
+            if (!v) { setMsg('signup-phone', ''); return '입력 필요'; }
+            const bad = !RULES.phone.test(v);
+            setMsg('signup-phone', bad ? RULES.phone.msg : '', 'error');
+            return bad ? '형식 오류' : '';
+        }
+
+        /* 생년월일: 연 → 월 → 일 순서, 1920년 ~ 오늘 범위 */
+        const BIRTH_MIN_YEAR = 1920;
+
+        function birthError() {
+            const yv = $('birth-year').value, mv = $('birth-month').value, dv = $('birth-day').value;
+            if (!yv || !mv || !dv) return '생년월일을 모두 입력해주세요.';
+            const y = +yv, m = +mv, d = +dv;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (yv.length !== 4 || y < BIRTH_MIN_YEAR || y > today.getFullYear())
+                return `출생연도는 ${BIRTH_MIN_YEAR}년부터 올해까지 입력해주세요.`;
+            if (m < 1 || m > 12) return '월은 1~12 사이로 입력해주세요.';
+            const lastDay = new Date(y, m, 0).getDate();
+            if (d < 1 || d > lastDay) return `${m}월은 1~${lastDay}일까지 입력할 수 있습니다.`;
+            if (new Date(y, m - 1, d) > today) return '미래 날짜는 입력할 수 없습니다.';
+            return '';
+        }
+
+        function checkBirth(showEmpty = true) {
+            const filled = $('birth-year').value && $('birth-month').value && $('birth-day').value;
+            if (!filled && !showEmpty) { setMsg('birth', ''); return '입력 필요'; }
+            const msg = birthError();
+            setMsg('birth', msg, 'error');
+            ['birth-year', 'birth-month', 'birth-day'].forEach(id => $(id).classList.toggle('input-invalid', !!msg));
+            return msg ? '형식 오류' : '';
+        }
+
+        function onlyDigits(el, maxLen) {
+            el.value = el.value.replace(/\D/g, '').slice(0, maxLen);
+        }
+
+        /* 배송지: 우편번호/도로명은 검색으로만, 상세주소만 직접 입력 */
+        function openPostcode() {
+            if (!window.daum || !daum.Postcode) {
+                setMsg('address', '주소 검색 서비스를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+            new daum.Postcode({
+                oncomplete(data) {
+                    $('signup-zipcode').value = data.zonecode;
+                    $('signup-road').value = data.roadAddress || data.address;
+                    setMsg('address', '');
+                    $('signup-address-detail').focus();
+                }
+            }).open();
+        }
+
+        function checkAddress() {
+            const road = $('signup-road').value;
+            const detail = $('signup-address-detail').value.trim();
+            let msg = '';
+            if (!road) msg = '주소 검색 버튼으로 도로명주소를 먼저 선택해주세요.';
+            else if (!detail) msg = '상세 주소(동·호수 등)를 입력해주세요.';
+            setMsg('address', msg);
+            $('signup-address-detail').classList.toggle('input-invalid', !road ? false : !detail);
+            return msg ? '입력 필요' : '';
+        }
+
+        function checkTerms() {
+            const ok = $('terms-agree').checked && $('privacy-agree').checked;
+            setMsg('terms', ok ? '' : '필수 약관 2개에 모두 동의해주세요.');
+            return ok ? '' : '필수 약관 미동의';
+        }
+
+        /* ---------- 단계별 검증 ---------- */
+        const STEP_CHECKS = {
+            1: () => [
+                ['signup-id', checkId()],
+                ['signup-password', checkPassword()],
+                ['signup-confirm-password', checkConfirm()],
+                ['signup-email', checkEmail()]
+            ],
+            2: () => [
+                ['signup-name', checkName()],
+                ['signup-phone', checkPhone()],
+                ['birth', checkBirth(true)],
+                ['signup-gender', $('signup-gender').value ? '' : '입력 필요']
+                // 성별은 select라 실시간 메시지가 없으므로 아래 validateStep에서 메시지 표시
+            ],
+            3: () => [
+                ['address', checkAddress()],
+                ['terms', checkTerms()]
+            ]
+        };
+
+        /* 현재 단계의 필수 항목을 검사. 실패하면 경고를 띄우고 false 반환 (입력값 유지) */
+        function validateStep(stepNo) {
+            const results = STEP_CHECKS[stepNo]();
+            const failed = results.filter(([, err]) => err);
+            if (!failed.length) {
+                setAlert(stepNo, '');
+                return true;
+            }
+            failed.forEach(([field, err]) => {
+                const existing = $('msg-' + field);
+                if (err === '입력 필요' && existing && !existing.textContent) setMsg(field, '필수 입력 항목입니다.');
+            });
+            if (failed.some(([, err]) => err === '입력 필요')) {
+                setAlert(stepNo, '필수 항목을 모두 입력해주세요.');
+            } else {
+                setAlert(stepNo, '잘못된 형식의 항목이 있습니다. 빨간 안내 문구를 확인해주세요.');
+            }
+            const FOCUS_TARGET = { birth: 'birth-year', address: 'signup-address-detail', terms: 'terms-agree' };
+            const [firstField] = failed[0];
+            ($(firstField) || $(FOCUS_TARGET[firstField]) || { focus() {} }).focus();
+            return false;
+        }
+
+        function goToStep(n) {
+            currentStep = n;
+            for (let i = 1; i <= SIGNUP_STEPS; i++) {
+                $('signup-step' + i).classList.toggle('active', i === n);
+                const ind = $('ind' + i);
+                ind.classList.toggle('current', i === n);
+                ind.classList.toggle('done', i < n);
+            }
+            setAlert(n, '');
+            document.querySelector('.modal-content').scrollTop = 0;
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) goToStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            goToStep(currentStep - 1); // 이전 단계는 검증하지 않고, 입력값도 그대로 둠
+        }
+
+        /* ---------- 회원가입 제출 ---------- */
+        function handleSignup() {
+            // 모든 단계를 다시 검사: 빠진 단계가 있으면 그 단계로 이동
+            for (let s = 1; s <= SIGNUP_STEPS; s++) {
+                if (!validateStep(s)) {
+                    goToStep(s);
+                    validateStep(s);
+                    return;
+                }
+            }
+
+            const data = {
+                loginId: $('signup-id').value.trim(),
+                password: $('signup-password').value,
+                email: $('signup-email').value.trim() || null,
+                name: $('signup-name').value.trim(),
+                phone: $('signup-phone').value,
+                birth: `${$('birth-year').value}-${String($('birth-month').value).padStart(2, '0')}-${String($('birth-day').value).padStart(2, '0')}`,
+                gender: $('signup-gender').value,
+                address: {
+                    zonecode: $('signup-zipcode').value,
+                    road: $('signup-road').value,
+                    detail: $('signup-address-detail').value.trim()
+                },
+                marketingAgree: $('marketing-agree').checked,
+                nightAgree: $('night-agree').checked
+            };
+
+            console.log('회원가입 데이터 (데모):', data);
+            alert('회원가입이 완료되었습니다! (데모)');
+            closeAuthModal();
+        }
+
+        /* ---------- 로그인 ---------- */
+        function handleLogin() {
+            const id = $('login-id').value.trim();
+            const pw = $('login-password').value;
+            if (!id || !pw) {
+                setAlert('login', '아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+            setAlert('login', '');
+            console.log('로그인 시도 (데모):', { id });
+            alert('로그인 되었습니다! (데모)');
+            closeAuthModal();
+        }
+
+        /* ---------- 실시간 바인딩 ---------- */
+        document.addEventListener('DOMContentLoaded', () => {
+            $('signup-id').addEventListener('input', () => {
+                if ($('signup-id').value) checkId();
+                else setMsg('signup-id', '');
+            });
+            $('signup-password').addEventListener('input', checkPassword);
+            $('signup-confirm-password').addEventListener('input', checkConfirm);
+            $('signup-email').addEventListener('input', checkEmail);
+            $('signup-name').addEventListener('input', () => { if ($('signup-name').value) checkName(); });
+            $('signup-phone').addEventListener('input', () => {
+                formatPhone($('signup-phone'));
+                if ($('signup-phone').value) checkPhone();
+            });
+            ['birth-year', 'birth-month', 'birth-day'].forEach(id => {
+                $(id).addEventListener('input', () => {
+                    onlyDigits($(id), id === 'birth-year' ? 4 : 2);
+                    if ($('birth-year').value || $('birth-month').value || $('birth-day').value) checkBirth(false);
+                });
+            });
+            $('signup-address-detail').addEventListener('input', () => {
+                if ($('signup-road').value) checkAddress();
+            });
+            ['terms-agree', 'privacy-agree'].forEach(id => $(id).addEventListener('change', checkTerms));
+            $('login-id').addEventListener('input', () => setAlert('login', ''));
+        });
+
+        // 모달 바깥 클릭 시 닫기 (입력 중 실수로 닫히지 않도록 내부 클릭은 무시)
+        window.addEventListener('click', event => {
+            if (event.target === $('authModal')) closeAuthModal();
+        });
+    </script>
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="brand-logo">blocc</div>
+        <div class="profile-icon" onclick="openAuthModal()" role="button" aria-label="로그인 또는 회원가입">👤</div>
+    </header>
+
+    <!-- ===== AUTH MODAL ===== -->
+    <div id="authModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">로그인</h2>
+                <button class="close-btn" onclick="closeAuthModal()" aria-label="닫기">&times;</button>
+            </div>
+
+            <!-- ---------- 로그인 ---------- -->
+            <div id="loginForm" class="form-section active">
+                <form onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="form-alert" id="alert-login"></div>
+
+                    <div class="form-group">
+                        <label for="login-id">아이디</label>
+                        <input type="text" id="login-id" placeholder="아이디 입력" autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">비밀번호</label>
+                        <input type="password" id="login-password" placeholder="비밀번호 입력" autocomplete="current-password">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">로그인</button>
+                    </div>
+
+                    <div class="toggle-form">
+                        계정이 없으신가요? <a onclick="toggleForm()">회원가입</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ---------- 회원가입 (3단계) ---------- -->
+            <div id="signupForm" class="form-section">
+                <div class="step-indicator">
+                    <span id="ind1" class="current">1. 계정</span>
+                    <span id="ind2">2. 개인정보</span>
+                    <span id="ind3">3. 배송·동의</span>
+                </div>
+
+                <form onsubmit="event.preventDefault();">
+
+                    <!-- Step 1: 계정 -->
+                    <div id="signup-step1" class="signup-step active">
+                        <div class="form-alert" id="alert-step1"></div>
+
+                        <div class="form-group">
+                            <label for="signup-id">아이디 <span class="tag">(필수)</span></label>
+                            <input type="text" id="signup-id" placeholder="영문 소문자로 시작, 4~20자" autocomplete="username">
+                            <div class="field-msg" id="msg-signup-id"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password">비밀번호 <span class="tag">(필수)</span></label>
+                            <input type="password" id="signup-password" placeholder="8~20자, 영문·숫자·특수문자 포함" autocomplete="new-password">
+                            <div class="field-msg" id="msg-signup-password"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-confirm-password">비밀번호 확인 <span class="tag">(필수)</span></label>
+                            <input type="password" id="signup-confirm-password" placeholder="비밀번호 재입력" autocomplete="new-password">
+                            <div class="field-msg" id="msg-signup-confirm-password"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-email">이메일 <span class="tag optional">(선택)</span></label>
+                            <input type="email" id="signup-email" placeholder="example@email.com" autocomplete="email">
+                            <div class="field-msg" id="msg-signup-email"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-primary" onclick="nextStep()">다음</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: 개인정보 -->
+                    <div id="signup-step2" class="signup-step">
+                        <div class="form-alert" id="alert-step2"></div>
+
+                        <div class="form-group">
+                            <label for="signup-name">실명 <span class="tag">(필수)</span></label>
+                            <input type="text" id="signup-name" placeholder="실명 입력 (닉네임 불가)" autocomplete="name">
+                            <div class="field-msg" id="msg-signup-name"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-phone">휴대폰 번호 <span class="tag">(필수)</span></label>
+                            <input type="tel" id="signup-phone" placeholder="010-0000-0000" inputmode="numeric" autocomplete="tel">
+                            <div class="field-msg" id="msg-signup-phone"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>생년월일 <span class="tag">(필수)</span></label>
+                            <div class="birth-row">
+                                <div class="birth-field">
+                                    <input type="text" id="birth-year" placeholder="1995" inputmode="numeric" maxlength="4" aria-label="출생 연도">
+                                    <span class="unit">년</span>
+                                </div>
+                                <div class="birth-field">
+                                    <input type="text" id="birth-month" placeholder="03" inputmode="numeric" maxlength="2" aria-label="출생 월">
+                                    <span class="unit">월</span>
+                                </div>
+                                <div class="birth-field">
+                                    <input type="text" id="birth-day" placeholder="07" inputmode="numeric" maxlength="2" aria-label="출생 일">
+                                    <span class="unit">일</span>
+                                </div>
+                            </div>
+                            <div class="field-msg" id="msg-birth"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-gender">성별 <span class="tag">(필수)</span></label>
+                            <select id="signup-gender">
+                                <option value="">선택</option>
+                                <option value="male">남</option>
+                                <option value="female">여</option>
+                                <option value="other">기타</option>
+                            </select>
+                            <div class="field-msg" id="msg-signup-gender"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="prevStep()">이전</button>
+                            <button type="button" class="btn-primary" onclick="nextStep()">다음</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: 배송지 · 약관 -->
+                    <div id="signup-step3" class="signup-step">
+                        <div class="form-alert" id="alert-step3"></div>
+
+                        <div class="form-group">
+                            <label>배송지 주소 <span class="tag">(필수)</span></label>
+                            <div class="input-row">
+                                <input type="text" id="signup-zipcode" placeholder="우편번호" readonly>
+                                <button type="button" class="btn-inline" onclick="openPostcode()">주소 검색</button>
+                            </div>
+                            <div style="height: 8px"></div>
+                            <input type="text" id="signup-road" placeholder="도로명주소 (주소 검색으로 선택)" readonly>
+                            <div style="height: 8px"></div>
+                            <input type="text" id="signup-address-detail" placeholder="상세 주소 (동·호수 등) 입력" autocomplete="address-line2">
+                            <div class="field-msg" id="msg-address"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>약관 및 동의</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="terms-agree">
+                                    <label for="terms-agree">이용약관 동의 <span class="tag">(필수)</span></label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="privacy-agree">
+                                    <label for="privacy-agree">개인정보 처리방침 동의 <span class="tag">(필수)</span></label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="marketing-agree">
+                                    <label for="marketing-agree">마케팅 정보 수신 동의 <span class="tag optional">(선택)</span></label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="night-agree">
+                                    <label for="night-agree">야간 메시지 수신 동의 <span class="tag optional">(선택)</span></label>
+                                </div>
+                            </div>
+                            <div class="field-msg" id="msg-terms"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="prevStep()">이전</button>
+                            <button type="button" class="btn-primary" onclick="handleSignup()">회원가입</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <img class="hero-image" src="assets/hero.png" alt="리모트 워크 환경: 창문 너머 풍경을 보며 노트북으로 일하는 장면" onerror="this.remove()">
+        <div class="hero-content">
+            <h1>당신은 어디에서 일하나요?</h1>
+            <p>도시와 여행지를 넘나드는 당신의 자유로운 일상을 위해<br>blocc이 존재합니다</p>
+            <div class="scroll-indicator">↓ 스크롤</div>
+        </div>
+    </section>
+
+    <!-- ===== PROBLEM (Before) ===== -->
+    <section class="problem">
+        <div class="problem-image">
+            <div class="placeholder"><span>영상: 일상에서 촬영한 다양한 모빌리티 장면 (카페, 공항, 이동 중 일하는 순간)</span></div>
+        </div>
+        <div class="problem-content">
+            <h2>모든 순간에 최적화된 가방이 필요했습니다</h2>
+            <p class="lead">
+                미팅, 대중교통, 카페, 공항, 여행지.<br>
+                일하는 공간과 방식이 끊임없이 변하는 시대,<br>
+                어느 상황에서도 신뢰할 수 있는 가방이 필요했습니다.
+            </p>
+
+            <h2 style="margin-top: 40px;">50개 가방을 테스트한 결과</h2>
+            <ul class="problem-list">
+                <li>노트북 수납 vs. 무게</li>
+                <li>미팅 격식 vs. 기능성</li>
+                <li>보안 vs. 접근성</li>
+                <li>이동성 vs. 실루엣</li>
+            </ul>
+            <p class="problem-conclusion">이 모든 것이 동시에<br>가능한 가방은 없었습니다.</p>
+        </div>
+    </section>
+
+    <!-- ===== CORE SENTENCE (노슈니 코어: 형태 → 변화) ===== -->
+    <section class="core">
+        <p class="core-sentence">
+            blocc은 가방을 파는 게 아니라,<br>
+            <em>일과 이동 사이의 경계를 지우는 하루</em>를 팝니다.
+        </p>
+        <div class="before-after">
+            <div class="ba-card ba-before">
+                <div class="ba-label">Before</div>
+                <h3>상황마다 가방을 바꾸는 하루</h3>
+                <p>미팅용 가방, 출근용 가방, 여행용 가방을 따로 들고 다니고, 노트북과 소지품을 매번 옮겨 담습니다.</p>
+            </div>
+            <div class="ba-arrow">→</div>
+            <div class="ba-card ba-after">
+                <div class="ba-label">After</div>
+                <h3>가방 하나로 끝나는 하루</h3>
+                <p>3초 안의 모드 전환으로 숄더·토트·백팩을 바꾸고, 필요한 물건은 1~3초 안에 꺼냅니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CORE VALUES ===== -->
+    <section class="values">
+        <div class="values-container">
+            <h2>브랜드의 핵심 가치</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="mono-icon">↔️</div>
+                    <h3>어디서나 신뢰할 수 있는</h3>
+                    <p class="subtitle">Seamless Transition</p>
+                    <p>미팅, 대중교통, 카페, 공항, 여행지. 언제 어디서나 편하게 사용할 수 있는 가방을 만들었습니다.</p>
+                </div>
+                <div class="value-card">
+                    <div class="mono-icon">⚙️</div>
+                    <h3>실용적 미니멀리즘</h3>
+                    <p class="subtitle">Function over Decoration</p>
+                    <p>수납효율, 경량성, 내구성, 빠른 모드전환. 일과 이동을 돕는 핵심 기능만 담았습니다.</p>
+                </div>
+                <div class="value-card">
+                    <div class="mono-icon">🏢</div>
+                    <h3>100% 국내 개발·생산</h3>
+                    <p class="subtitle">Radical Transparency</p>
+                    <p>기획부터 필드테스트까지, 50년 이상의 경력을 가진 국내 업체와 함께 모든 과정을 투명하게 진행합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRODUCT FEATURES ===== -->
+    <section class="features">
+        <div class="features-container">
+            <div class="features-intro">
+                <p class="tagline"><em>"We Overthink, So You Don't."</em></p>
+                <p class="body">'복잡한 세상 속 선택을 단순하게'<br>당신의 삶을 더 가볍고, 편안하고, 간단하게 만들기 위해 존재합니다.</p>
+            </div>
+
+            <div class="feature-items">
+                <div class="feature-item">
+                    <div class="mono-icon">1️⃣</div>
+                    <h3>3초 안의 모드 전환</h3>
+                    <p>숄더/토트 ↔ 백팩, 상황에 맞게 즉각 변환합니다.</p>
+                    <div class="feature-item-image">
+                        <div class="placeholder"><span>사진: 미팅실 입장 시 숄더백 모드 + 화살표 + 카페 작업 시 백팩 모드</span></div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="mono-icon">2️⃣</div>
+                    <h3>15인치 노트북 + 3분할 파티션</h3>
+                    <p>버드아이뷰 레이아웃으로 1-3초 내 필요한 물건을 꺼낼 수 있습니다.</p>
+                    <div class="feature-item-image">
+                        <div class="placeholder"><span>사진: 가방 상단뷰 또는 내부 분할 파티션 클로즈업</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-items">
+                <div class="feature-item">
+                    <div class="mono-icon">3️⃣</div>
+                    <h3>경량 + 내구성</h3>
+                    <p>고급 나일론으로 짐을 많이 넣어도 형태를 유지하며, 장시간 이동에도 어깨 피로를 최소화합니다.</p>
+                    <div class="feature-item-image">
+                        <div class="placeholder"><span>사진: 소재 클로즈업 또는 나일론 텍스처</span></div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="mono-icon">4️⃣</div>
+                    <h3>보안 설계</h3>
+                    <p>숨겨진 지퍼와 분리 포켓으로 소매치기를 방지하여, 해외 출장과 도시 이동 시 안심할 수 있습니다.</p>
+                    <div class="feature-item-image">
+                        <div class="placeholder"><span>사진: 지퍼 위치 또는 포켓 구조 다이어그램</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spec-box">
+                <p class="spec-label">상세 스펙</p>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <p class="spec-category">Size</p>
+                        <p>40×30×10 cm<br>15인치 노트북 수납 최적화</p>
+                    </div>
+                    <div class="spec-item">
+                        <p class="spec-category">3-Way Mode</p>
+                        <p>토트백 • 숄더백 • 백팩<br>상황에 맞게 자유롭게 변환</p>
+                    </div>
+                    <div class="spec-item">
+                        <p class="spec-category">Material &amp; Hardware</p>
+                        <p>고밀도 나일론<br>양방향 잠금 고리 • 고급 실버 부자재</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DEEP DIVE ===== -->
+    <section class="deepdive">
+        <video class="deepdive-image" autoplay muted loop playsinline>
+            <source src="assets/remote-work.mp4" type="video/mp4">
+        </video>
+        <div class="deepdive-content">
+            <p>일하는 경계가 사라졌습니다.
+
+카페, 도심 미팅, 해외 출장, 여행지...
+일하는 장소가 끊임없이 변하는 시대입니다.
+
+다양한 환경에 적응할 수 있는 제품을 2년간 고민했습니다.
+50년 이상의 가방 제작 경력을 가진 국내 장인과 함께
+더 나은 일과 이동을 돕는 제품 개발을 시작했습니다.
+
+지금 이 순간도 계속 진화하고 있습니다.</p>
+        </div>
+    </section>
+
+    <!-- ===== PROOF (퀄리티로 증명) ===== -->
+    <section class="process">
+        <div class="process-container">
+            <h2>퀄리티로 증명합니다</h2>
+
+            <div class="process-step">
+                <div class="process-text">
+                    <h3>핵심 기능 기획</h3>
+                    <p>
+                        ☑ 모든 상황에 대응 가능한 구조<br>
+                        ☑ 가벼우면서 내구성 있는 소재<br>
+                        ☑ 빠른 접근성을 위한 파티션<br>
+                        ☑ 도시와 여행에 최적화된 보안 설계
+                    </p>
+                </div>
+                <div class="process-image">
+                    <div class="placeholder"><span>사진: 마인드맵 또는 스케치/기획 노트</span></div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="process-text">
+                    <h3>50+년 경력의 국내 업체와 협력</h3>
+                    <p>50년 이상의 경력을 가진 국내 제조사와 협력하여, 가장 견고하고 오래 사용할 수 있는 제품을 만듭니다.</p>
+                </div>
+                <div class="process-image">
+                    <div class="placeholder"><span>사진: 협력 제조사 또는 생산 현장</span></div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="process-text">
+                    <h3>원단 및 부자재 선택</h3>
+                    <p>다양한 환경 모두에 사용하기 위해 양방향 잠금 고리, 세탁 가능하며 생활 방수가 되는 경량 원단, 도색이 벗겨지지 않는 고급 실버 부자재를 사용했습니다.</p>
+                </div>
+                <div class="process-image">
+                    <div class="placeholder"><span>사진: 원단 샘플, 부자재, 고급 실버 하드웨어</span></div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="process-text">
+                    <h3>실제 사용 환경에서 검증</h3>
+                    <p>14인치 노트북을 들고 싱가포르와 대구 출장을 다녔습니다. 비행기, 기차, 버스, 지하철 등 다양한 대중교통으로 이동하고, 호텔, 카페 등 다양한 외부 환경에서 일하며 제품을 검증했습니다.</p>
+                </div>
+                <div class="process-image">
+                    <div class="placeholder"><span>사진: 싱가포르/대구 출장 시 실제 사용 장면 (공항, 기차역, 카페, 호텔 등)</span></div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="process-text">
+                    <h3>2030 타깃 사용자 피드백 수집</h3>
+                    <p>실제 타깃 사용자들과 함께 제품을 사용해본 피드백을 수집하여, 최종 제품 완성을 향해 나아가고 있습니다.</p>
+                </div>
+                <div class="process-image">
+                    <div class="placeholder"><span>사진: 사용자 피드백 현장 또는 함께 테스트하는 모습</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VALUE MESSAGE ===== -->
+    <section class="value-message">
+        <div class="value-message-container">
+            <h2>일상 속 반복되는 불편함을 해결하기 위해</h2>
+            <p>일하는 방식의 경계가 없어진 시대,
+이 시대의 일하는 사람을 위해
+반복되는 불편함을 해결할 라이프스타일 제품을 만듭니다.
+
+청년들이 겪는 불편함을 해소하고
+국내 기업과의 상생을 위해 노력합니다.</p>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta">
+        <div class="cta-container">
+            <h2>브랜드와 함께합니다</h2>
+            <div class="cta-grid">
+                <div class="cta-card">
+                    <div class="mono-icon">👤</div>
+                    <h3>SNS 팔로우</h3>
+                    <p class="subtext">@stark.m0de<br><br>매주 새로운 제작기<br>콘텐츠 / 샘플<br>개선 과정 공유</p>
+                    <a href="https://instagram.com/stark.m0de" class="cta-button">인스타그램 팔로우</a>
+                </div>
+
+                <div class="cta-card">
+                    <div class="mono-icon">💬</div>
+                    <h3>피드백 남기기</h3>
+                    <p class="subtext">당신의 니즈를 보내주세요.<br>함께 제품을 만들어 나갑니다.</p>
+                    <ul class="cta-list">
+                        <li>• 당신이 원하는 색상</li>
+                        <li>• 필요한 기능</li>
+                        <li>• 사용 경험</li>
+                    </ul>
+                    <a href="mailto:hello@blocc.kr" class="cta-button">이메일로 피드백</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAKER ===== -->
+    <section class="maker">
+        <div class="maker-container">
+            <h2>브랜드를 소개합니다</h2>
+            <div class="maker-image">
+                <div class="placeholder"><span>사진: 창업자의 얼굴 또는 작업 중인 모습 (화이트 배경)</span></div>
+            </div>
+            <h3>창업자</h3>
+            <div class="maker-bio">
+                <!-- 창업자 소개 문구는 아직 비어 있음 -->
+            </div>
+            <div class="maker-sns">
+                <a href="https://instagram.com/stark.m0de">Instagram @stark.m0de</a>
+                <a href="mailto:hello@blocc.kr">Email</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-block">
+                    <h4>창업자</h4>
+                    <p>브랜드의 시작을 만든 사람</p>
+                    <a href="https://instagram.com/stark.m0de">Instagram @stark.m0de</a>
+                    <a href="mailto:hello@blocc.kr">Email</a>
+                </div>
+
+                <div class="footer-block">
+                    <h4>협력 제조사</h4>
+                    <p>50년 이상의 경력을 가진 국내 장인</p>
+                    <p>가장 견고한 제품을 함께 만듭니다</p>
+                </div>
+
+                <div class="footer-block">
+                    <h4>경기청년 갭이어</h4>
+                    <p>이 브랜드는 경기청년 갭이어 프로젝트를 통해 지원받았습니다</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2026 blocc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
