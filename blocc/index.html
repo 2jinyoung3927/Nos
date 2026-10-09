@@ -814,6 +814,30 @@
             }
         };
 
+        /* 취약한 비밀번호 차단: 0000, 1234, 4321, 1111 같은 숫자 패턴, 같은 글자 4회 이상 반복,
+           키보드/흔한 단어, 아이디를 포함한 경우 사용할 수 없음. 문제가 없으면 '' 반환 */
+        const COMMON_PASSWORD_PARTS = ['password', 'qwer', 'asdf', 'zxcv', 'qwerty', 'abcd', 'letmein', 'welcome'];
+
+        function weakPasswordReason(pw, loginId) {
+            const lower = pw.toLowerCase();
+            if (/(.)\1{3,}/.test(pw)) return '같은 글자를 4번 이상 반복할 수 없습니다. (예: 0000, aaaa)';
+            // 연속된 숫자/문자 4자리 (1234, 4321, abcd, dcba 등)
+            for (let i = 0; i + 3 < lower.length; i++) {
+                const codes = [0, 1, 2, 3].map(k => lower.charCodeAt(i + k));
+                const step = codes[1] - codes[0];
+                const sameKind = codes.every(c => /[0-9]/.test(String.fromCharCode(c)) || /[a-z]/.test(String.fromCharCode(c)));
+                if (Math.abs(step) === 1 && sameKind && codes.every((c, k) => k === 0 || c - codes[k - 1] === step)) {
+                    return '1234, 4321, abcd처럼 연속된 숫자·문자는 사용할 수 없습니다.';
+                }
+            }
+            if (COMMON_PASSWORD_PARTS.some(part => lower.includes(part))) return '흔히 쓰이는 단어나 키보드 패턴은 사용할 수 없습니다.';
+            // 숫자만 남긴 뒤 흔한 더미 숫자인지 확인 (예: 1212, 123123, 12341234)
+            const digitRuns = pw.match(/\d{4,}/g) || [];
+            if (digitRuns.some(run => /^(\d{1,4})\1+$/.test(run))) return '반복되는 숫자 패턴(예: 1212, 123123)은 사용할 수 없습니다.';
+            if (loginId && lower.includes(loginId.toLowerCase())) return '아이디를 비밀번호에 포함할 수 없습니다.';
+            return '';
+        }
+
         const $ = id => document.getElementById(id);
 
         function openAuthModal() {
@@ -867,10 +891,10 @@
         function checkPassword() {
             const v = $('signup-password').value;
             if (!v) { setMsg('signup-password', ''); return checkConfirm(); }
-            const bad = !RULES.password.test(v);
-            setMsg('signup-password', bad ? RULES.password.msg : '', 'error');
+            const msg = !RULES.password.test(v) ? RULES.password.msg : weakPasswordReason(v, $('signup-id').value.trim());
+            setMsg('signup-password', msg, 'error');
             checkConfirm();
-            return bad ? '형식 오류' : '';
+            return msg ? '형식 오류' : '';
         }
 
         function checkConfirm() {
