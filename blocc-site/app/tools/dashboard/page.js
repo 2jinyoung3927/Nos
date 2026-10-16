@@ -116,16 +116,16 @@ export default function Dashboard() {
             <>
               <div className="legend"><span><i style={{ background: 'var(--bar)' }} />클릭</span><span><i style={{ background: 'var(--bar2)' }} />신청</span></div>
               <div className="tbl-wrap" style={{ padding: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 140, minWidth: data.daily.length * 34 }} role="img" aria-label="일별 클릭과 신청 수 막대 그래프">
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 140, width: data.daily.length * 40 }} role="img" aria-label="일별 클릭과 신청 수 막대 그래프">
                   {data.daily.map((d) => (
-                    <div key={d.day} title={`${d.day} 클릭 ${d.clicks}, 신청 ${d.signups}`} style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: 2, height: '100%' }}>
+                    <div key={d.day} title={`${d.day} 클릭 ${d.clicks}, 신청 ${d.signups}`} style={{ flex: '0 0 34px', display: 'flex', alignItems: 'flex-end', gap: 2, height: '100%' }}>
                       <div style={{ flex: 1, height: `${(d.clicks / maxDaily) * 100}%`, minHeight: d.clicks ? 2 : 0, background: 'var(--bar)', borderRadius: '3px 3px 0 0' }} />
                       <div style={{ flex: 1, height: `${(d.signups / maxDaily) * 100}%`, minHeight: d.signups ? 2 : 0, background: 'var(--bar2)', borderRadius: '3px 3px 0 0' }} />
                     </div>
                   ))}
                 </div>
-                <div style={{ display: 'flex', gap: 6, minWidth: data.daily.length * 34, marginTop: 4 }}>
-                  {data.daily.map((d) => <span key={d.day} className="note" style={{ flex: 1, fontSize: 11, textAlign: 'center' }}>{d.day.slice(5)}</span>)}
+                <div style={{ display: 'flex', gap: 6, width: data.daily.length * 40, marginTop: 4 }}>
+                  {data.daily.map((d) => <span key={d.day} className="note" style={{ flex: '0 0 34px', fontSize: 11, textAlign: 'center' }}>{d.day.slice(5)}</span>)}
                 </div>
               </div>
             </>

@@ -27,7 +27,8 @@ export function pickValidUtm(obj) {
     const v = obj[k];
     if (typeof v === 'string' && isValidUtm(v)) out[k] = v;
   }
-  return out.source || out.medium || out.campaign || out.content ? out : null;
+  // 어디서 왔는지(source)가 없는 꼬리표는 경로로 보지 않는다.
+  return out.source ? out : null;
 }
 
 export const CAMPAIGNS = [

@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { db } from '@/lib/supabase';
-import { isValidUtm, normalizeUtm } from '@/lib/utm';
+import { isValidUtm, normalizeUtm, suggestContent } from '@/lib/utm';
 import { buildTargetUrl, shortUrl, landingBase } from '@/lib/links';
 import { requireAdmin, json } from '@/lib/adminGuard';
 
@@ -50,7 +50,12 @@ export async function POST(request) {
   for (const item of body.items) {
     const { data: ch } = await supabase.from('blocc_channels').select('*').eq('id', item.channel_id).maybeSingle();
     if (!ch) { results.push({ error: '채널을 찾을 수 없어요.', channel_id: item.channel_id }); continue; }
-    const content = item.content ? normalizeUtm(item.content) : '';
+    let content = item.content ? normalizeUtm(item.content) : '';
+    if (!content && ch.content_mode !== 'free') {
+      // 비워 보내면 채널 방식대로 서버가 정한다 (고정값 / 오늘 날짜 / 다음 순번)
+      const { data: mine } = await supabase.from('blocc_links').select('content').eq('channel_id', ch.id);
+      content = suggestContent(ch, (mine || []).map((m) => m.content));
+    }
     if (ch.content_mode === 'free' && !content) { results.push({ error: `${ch.name}: 소재 코드를 입력해 주세요.`, channel_id: ch.id }); continue; }
     if (item.content && !isValidUtm(content)) { results.push({ error: `${ch.name}: 소재 코드는 영어 소문자·숫자·하이픈만 쓸 수 있어요.`, channel_id: ch.id }); continue; }
 
